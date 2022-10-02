@@ -2,6 +2,9 @@
  * Main entry point into kernel file
  */
 
+#include "mmio.h"
+#include "uart.h"
+
 /**
  * integer for the board type of the pi
  */
@@ -16,7 +19,12 @@ unsigned int rpi = 0;
 
 void kernel_main() {
 
+  // initialize MMIO
+  mmio_initialize(3);
+  // initialize UART
+  uart_initialize();
+  // write to serial
+  uart_puts("Hello, World!");
   
-  
-    while(1); // infinite loop
+  while(1); // infinite loop
 }
