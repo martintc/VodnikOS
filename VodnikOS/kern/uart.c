@@ -1,6 +1,7 @@
 #include "uart.h"
 #include "mmio.h"
 #include "mailbox.h"
+#include "delay.h"
 
 /**
  * Where the GPIO Base starts relative to MMIO
@@ -10,7 +11,7 @@
 /**
  * Where the UART base starts relative to MMIO
  */
-#define UART_BASE 0x1000
+#define UART_BASE (GPIO_BASE + 0x1000)
 
 /**
  * Controls the actuation of pull up/down pins of all GPIO pins
@@ -26,20 +27,20 @@
  * Registers for UART
  */
 #define UART_DR     (UART_BASE + 0x00)
-#define UART_RSRECR (UART_BASE + 0x4)
+#define UART_RSRECR (UART_BASE + 0x04)
 #define UART_FR     (UART_BASE + 0x18)
-#define UART_ILPR   (UART_BASE + 0x2)
+#define UART_ILPR   (UART_BASE + 0x20)
 #define UART_IBRD   (UART_BASE + 0x24)
 #define UART_FBRD   (UART_BASE + 0x28)
 #define UART_LCRH   (UART_BASE + 0x2C)
-#define UART_CR     (UART_BASE + 0x3)
+#define UART_CR     (UART_BASE + 0x30)
 #define UART_IFLS   (UART_BASE + 0x34)
 #define UART_IMSC   (UART_BASE + 0x38)
 #define UART_RIS    (UART_BASE + 0x3C)
-#define UART_MIS    (UART_BASE + 0x4)
+#define UART_MIS    (UART_BASE + 0x40)
 #define UART_ICR    (UART_BASE + 0x44)
 #define UART_DMACR  (UART_BASE + 0x48)
-#define UART_ITCR   (UART_BASE + 0x8)
+#define UART_ITCR   (UART_BASE + 0x80)
 #define UART_ITIP   (UART_BASE + 0x84)
 #define UART_ITOP   (UART_BASE + 0x88)
 #define UART_TDR    (UART_BASE + 0x8C)
@@ -53,10 +54,11 @@ void uart_initialize() {
   // set up GPIO pins
   mmio_write(GPPUD, 0);
   // need a delay here
+  delay(150);
   // Write 0 to GPPUDCLK to make the change
-  mmio_write(GPPUDCLK, (1 << PIN_14) || (1 << PIN_15));
+  mmio_write(GPPUDCLK, (1 << PIN_14) | (1 << PIN_15));
   // delay needed here
-
+  delay(150);
   // write 0 to GPPUDCLK
   mmio_write(GPPUDCLK, 0);
 
@@ -87,7 +89,6 @@ void uart_initialize() {
  * arguments:
  *   c - a single character to be written
  */
-
 void uart_putc(unsigned char c) {
   // check that the uart is ready to receive a character to write
   while(mmio_read(UART_FR) & (1 << 5));
